@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Qwen AI Calculator</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app">
+    <header>
+      <h1>🧮 Qwen AI Calculator</h1>
+      <p class="sub">Powered by <code>qwen3.6:35b-a3b</code> running locally on your Mac via Ollama</p>
+    </header>
+
+    <!-- Standard calculator -->
+    <section class="panel">
+      <div class="display">
+        <div id="expr" class="expr"></div>
+        <div id="result" class="result">0</div>
+      </div>
+      <div class="keys">
+        <button class="k fn" data-act="clear">C</button>
+        <button class="k fn" data-act="back">⌫</button>
+        <button class="k fn" data-act="op" data-val="%">%</button>
+        <button class="k op" data-act="op" data-val="/">÷</button>
+
+        <button class="k" data-act="num" data-val="7">7</button>
+        <button class="k" data-act="num" data-val="8">8</button>
+        <button class="k" data-act="num" data-val="9">9</button>
+        <button class="k op" data-act="op" data-val="*">×</button>
+
+        <button class="k" data-act="num" data-val="4">4</button>
+        <button class="k" data-act="num" data-val="5">5</button>
+        <button class="k" data-act="num" data-val="6">6</button>
+        <button class="k op" data-act="op" data-val="-">−</button>
+
+        <button class="k" data-act="num" data-val="1">1</button>
+        <button class="k" data-act="num" data-val="2">2</button>
+        <button class="k" data-act="num" data-val="3">3</button>
+        <button class="k op" data-act="op" data-val="+">+</button>
+
+        <button class="k" data-act="num" data-val="0">0</button>
+        <button class="k" data-act="num" data-val=".">.</button>
+        <button class="k" data-act="paren" data-val="(">(</button>
+        <button class="k eq" data-act="equals">=</button>
+      </div>
+    </section>
+
+    <!-- AI natural-language -->
+    <section class="panel ai">
+      <label for="ask">Ask in plain English:</label>
+      <div class="airow">
+        <input id="ask" type="text" placeholder="e.g. 15% of 240 plus 3 squared" autocomplete="off" />
+        <button id="askBtn" class="ai-btn">Ask Qwen</button>
+      </div>
+      <div id="aiMeta" class="meta"></div>
+      <div id="aiOut" class="aiout"></div>
+    </section>
+
+    <footer>
+      <p id="status" class="status">Checking Ollama…</p>
+    </footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
