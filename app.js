@@ -19,69 +19,51 @@ const OPS = {
 };
 
 function safeEval(expr) {
-  const ast = Function("return (function(){const a=arguments;return null;})") && null; // noop to keep lint calm
-  const tree = parseExpr(expr);
-  return evalNode(tree);
-}
-function parseExpr(expr) {
-  // Use a tiny tokenizer + recursive descent for + - * / % ** and parentheses.
-  const tokens = expr
-    .replace(/\*\*/g, "^^")
-    .match(/\d+\.?\d*|[+\-*/%^()]/g);
+  const tokens = expr.match(/\d+\.?\d*|\(|\)|\*\*|[+\-*/%]/g);
   if (!tokens) throw new Error("No tokens");
   let pos = 0;
   const peek = () => tokens[pos];
   const next = () => tokens[pos++];
-  function parseExprLevel() {
-    let left = parseTerm();
+  function pE() { // add / sub
+    let l = pT();
     while (peek() === "+" || peek() === "-") {
       const op = next();
-      const right = parseTerm();
-      left = { type: op === "+" ? "add" : "sub", left, right };
+      l = { type: op === "+" ? "add" : "sub", left: l, right: pT() };
     }
-    return left;
+    return l;
   }
-  function parseTerm() {
-    let left = parseFactor();
+  function pT() { // mul / div / mod
+    let l = pF();
     while (peek() === "*" || peek() === "/" || peek() === "%") {
       const op = next();
-      const right = parseFactor();
-      left = { type: op, left, right };
+      const type = op === "*" ? "mul" : op === "/" ? "div" : "mod";
+      l = { type, left: l, right: pF() };
     }
-    return left;
+    return l;
   }
-  function parseFactor() {
-    if (peek() === "^") {
-      next();
-      const right = parseFactor();
-      return { type: "pow", left: { type: "num", v: 1 }, right };
-    }
-    return parseUnary();
+  function pF() { // unary minus
+    if (peek() === "-") { next(); return { type: "neg", v: pPow() }; }
+    return pPow();
   }
-  function parseUnary() {
-    if (peek() === "-") {
-      next();
-      return { type: "neg", v: parseUnary() };
-    }
-    return parsePrimary();
+  function pPow() { // power (right-associative)
+    let base = pPrimary();
+    if (peek() === "**") { next(); return { type: "pow", left: base, right: pPow() }; }
+    return base;
   }
-  function parsePrimary() {
+  function pPrimary() {
     const t = peek();
     if (t === "(") {
       next();
-      const e = parseExprLevel();
+      const e = pE();
       if (peek() === ")") next();
       return e;
     }
-    if (/^\d/.test(t)) {
-      next();
-      return { type: "num", v: parseFloat(t) };
-    }
+    if (/^\d/.test(t)) { next(); return { type: "num", v: parseFloat(t) }; }
     throw new Error("Unexpected token " + t);
   }
-  const ast = parseExprLevel();
+  const ast = pE();
   if (pos !== tokens.length) throw new Error("Trailing tokens");
-  return ast;
+  return evalNode(ast);
 }
 function evalNode(n) {
   switch (n.type) {
